@@ -1,6 +1,6 @@
-// import {
-//   "PaiGack/moonbitqrcode" @lib,
-// }
+import {
+  "PaiGack/moonbitqrcode/src/lib",
+}
 
 options(
   "is-main": true,
