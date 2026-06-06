@@ -1,0 +1,7 @@
+// import {
+//   "PaiGack/moonbitqrcode" @lib,
+// }
+
+options(
+  "is-main": true,
+)
