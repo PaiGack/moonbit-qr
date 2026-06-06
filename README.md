@@ -136,16 +136,6 @@ moon test src/lib
 - [ ] 自动版本选择优化
 - [ ] 性能优化
 
-## 📖 可行性分析
-
-详见 [docs/prd-000-feasibility-analysis.md](docs/prd-000-feasibility-analysis.md)
-
-该文档包含：
-- 完整的技术可行性分析
-- 从Go到MoonBit的移植策略
-- 分8个阶段的执行计划
-- 工作量估算（20-30工作日）
-
 ## 🔗 参考
 
 - **原始项目**: [rsc.io/qr](https://pkg.go.dev/rsc.io/qr) (Go)
