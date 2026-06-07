@@ -5,7 +5,15 @@ test "data writing at row 0 positions 9-12" {
 
   // Encode data
   let bits = @coding.encode_data("HELLO WORLD", 1, @coding.L)
-  let data_with_ec = @coding.add_error_correction(bits.bytes(), 7, 1)
+
+  // Pad to target length (Version 1 Level L = 152 bits = 19 bytes)
+  @coding.pad_bits(bits, 152)
+
+  let data_bytes = bits.bytes()
+  println("\n=== Data bytes (before EC) ===")
+  println("Data bytes: " + data_bytes.length().to_string())
+
+  let data_with_ec = @coding.add_error_correction(data_bytes, 7, 1)
 
   println("\n=== Encoded bytes ===")
   println("Total bytes: " + data_with_ec.length().to_string())
@@ -17,6 +25,17 @@ test "data writing at row 0 positions 9-12" {
     }
     let hex = if byte < 16 { "0" + byte.to_string() } else { byte.to_string() }
     println("  byte[" + i.to_string() + "] = " + byte.to_string() + " (0x" + hex + ") = " + binary)
+  }
+
+  // Print byte[17] specifically
+  if data_with_ec.length() > 17 {
+    let byte17 = data_with_ec[17]
+    let mut binary = ""
+    for b = 7; b >= 0; b = b - 1 {
+      binary = binary + (if (byte17 & (1 << b)) != 0 { "1" } else { "0" })
+    }
+    println("  byte[17] = " + byte17.to_string() + " = " + binary + " (bit 6 = " +
+            (if (byte17 & (1 << 6)) != 0 { "1" } else { "0" }) + ")")
   }
 
   // Go bytes for comparison:

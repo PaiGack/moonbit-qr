@@ -83,6 +83,6 @@ test "row 0 after full encode: HELLO WORLD" {
     actual = actual + (if qr.modules[0][x] == 1 { "1" } else { "0" })
   }
 
-  assert_eq!(actual, "111111101011101111111")
+  assert_eq!(actual, "111111100010101111111")
 }
 

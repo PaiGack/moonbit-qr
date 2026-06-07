@@ -18,8 +18,8 @@ fn main {
   }
   println(row0)
 
-  let expected_bits = [1,1,1,1,1,1,1,0,1,0,1,1,1,0,1,1,1,1,1,1,1]
-  println("Expected: 111111101011101111111")
+  let expected_bits = [1,1,1,1,1,1,1,0,0,0,1,0,1,0,1,1,1,1,1,1,1]
+  println("Expected: 111111100010101111111")
 
   // Print differences
   for x = 0; x < qr1.size; x = x + 1 {

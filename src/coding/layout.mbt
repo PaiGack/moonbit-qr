@@ -234,18 +234,27 @@ pub fn apply_mask(p : Plan, mask : Int) -> Unit {
 fn is_function_pattern(p : Plan, x : Int, y : Int) -> Bool {
   let size = p.pixel.length()
 
-  if (x <= 8 && y <= 8) || (x >= size - 9 && y <= 8) || (x <= 8 && y >= size - 9) {
+  // Finder patterns (7x7) + separators (1 pixel) + format area
+  // Top-left: (0,0) to (8,8)
+  // Top-right: (size-8,0) to (size-1,8)
+  // Bottom-left: (0,size-8) to (8,size-1)
+  if (x <= 8 && y <= 8) || (x >= size - 8 && y <= 8) || (x <= 8 && y >= size - 8) {
     return true
   }
 
+  // Timing patterns (row 6 and column 6)
   if x == 6 || y == 6 {
     return true
   }
 
+  // Dark module at (8, size-8)
   if x == 8 && y == size - 8 {
     return true
   }
 
+  // Format information strips
+  // Column 8: rows 0-8 and rows size-8 to size-1
+  // Row 8: columns 0-8 and columns size-8 to size-1
   if (x == 8 && (y < 9 || y >= size - 8)) || (y == 8 && (x < 9 || x >= size - 8)) {
     return true
   }

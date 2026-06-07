@@ -13,6 +13,7 @@ pub fn encode_data(text : String, version : Int, _level : Level) -> Bits {
     Byte => encode_bytes(bits, text, version)
   }
 
+  // Note: padding is done by the caller after getting capacity info
   bits
 }
 
@@ -228,9 +229,6 @@ pub fn write_data(p : Plan, data : Array[Int]) -> Unit {
   let mut bit_idx = 0
   let total_bits = data.length() * 8
 
-  // Debug: track which bit_idx writes to row 0, x=9-12
-  let debug_positions : Array[(Int, Int, Int)] = []
-
   // Write data in zigzag pattern matching Go rsc.io/qr implementation
   // Sweep right-to-left in column pairs, alternating down/up
   let mut x = size
@@ -248,9 +246,6 @@ pub fn write_data(p : Plan, data : Array[Int]) -> Unit {
           pixel_off
         }
         p.pixel[y][x - 1] = bit
-        if y == 0 && x - 1 >= 9 && x - 1 <= 12 {
-          debug_positions.push((x - 1, y, bit_idx))
-        }
         bit_idx = bit_idx + 1
       }
 
@@ -264,9 +259,6 @@ pub fn write_data(p : Plan, data : Array[Int]) -> Unit {
           pixel_off
         }
         p.pixel[y][x - 2] = bit
-        if y == 0 && x - 2 >= 9 && x - 2 <= 12 {
-          debug_positions.push((x - 2, y, bit_idx))
-        }
         bit_idx = bit_idx + 1
       }
     }
@@ -289,9 +281,6 @@ pub fn write_data(p : Plan, data : Array[Int]) -> Unit {
           pixel_off
         }
         p.pixel[y][x - 1] = bit
-        if y == 0 && x - 1 >= 9 && x - 1 <= 12 {
-          debug_positions.push((x - 1, y, bit_idx))
-        }
         bit_idx = bit_idx + 1
       }
 
@@ -305,22 +294,10 @@ pub fn write_data(p : Plan, data : Array[Int]) -> Unit {
           pixel_off
         }
         p.pixel[y][x - 2] = bit
-        if y == 0 && x - 2 >= 9 && x - 2 <= 12 {
-          debug_positions.push((x - 2, y, bit_idx))
-        }
         bit_idx = bit_idx + 1
       }
     }
 
     x = x - 2
-  }
-
-  // Print debug info
-  if debug_positions.length() > 0 {
-    println("\nDEBUG write_data: Row 0, x=9-12 written at:")
-    for i = 0; i < debug_positions.length(); i = i + 1 {
-      let pos = debug_positions[i]
-      println("  x=" + pos.0.to_string() + ", y=" + pos.1.to_string() + ", bit_idx=" + pos.2.to_string())
-    }
   }
 }

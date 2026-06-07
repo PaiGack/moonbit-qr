@@ -24,6 +24,12 @@ func TestDataBeforeMask(t *testing.T) {
 		fmt.Printf("  byte[%d] = 0x%02X = %08b\n", i, bytes[i], bytes[i])
 	}
 
+	// Print byte[17]
+	if len(bytes) > 17 {
+		fmt.Printf("  byte[17] = 0x%02X = %08b (bit 6 = %d)\n",
+			bytes[17], bytes[17], (bytes[17]>>6)&1)
+	}
+
 	// Now check what Go writes at row 0, positions 9-12
 	// We need to understand the write_data zigzag pattern
 	fmt.Println("\nRow 0, positions 9-12 in Go's pixel grid (before applying mask):")
