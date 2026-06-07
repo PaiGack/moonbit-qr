@@ -1,6 +1,0 @@
-{
-  "is-main": false,
-  "import": [
-    "PaiGack/moonbitqrcode/src/gf256"
-  ]
-}

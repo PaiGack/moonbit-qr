@@ -1,7 +1,0 @@
-{
-  "is-main": false,
-  "import": [
-    "PaiGack/moonbitqrcode/src/coding",
-    "PaiGack/moonbitqrcode/src/crypto"
-  ]
-}
