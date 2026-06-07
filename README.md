@@ -89,10 +89,8 @@ moon test src/lib                  # 仅 lib 包测试
 
 ```bash
 cd baseline
-go run go_rscio_qr/main.go > go_output.txt.tmp
-cd ..
-moon run src/cmd/main > baseline/moonbit_output.txt.tmp
-diff baseline/moonbit_output.txt.tmp baseline/go_output.txt.tmp
+./compare.sh
+diff moonbit_output.txt.tmp go_output.txt.tmp
 ```
 
 三个示例 QR 码（HELLO WORLD、12345678、https://moonbitlang.com）的输出**逐字节一致**。✅

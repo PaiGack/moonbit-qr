@@ -9,7 +9,7 @@ echo ""
 echo "🌙 Running MoonBit implementation..."
 echo "------------------------------------------"
 cd ..
-moon run cmd/main/main.mbt > baseline/moonbit_output.txt.tmp
+moon run src/cmd/main/main.mbt > baseline/moonbit_output.txt.tmp
 cd baseline
 cat moonbit_output.txt.tmp
 echo ""
