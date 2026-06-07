@@ -19,6 +19,6 @@ repository = ""
 
 license = "Apache-2.0"
 
-keywords = [ ]
+keywords = [ "QR", "MoonBit QR Code"]
 
-description = ""
+description = "Basic QR encoder."
