@@ -96,7 +96,7 @@ pub fn Bits::pad(self : Bits, n : Int) -> Unit {
   } else {
     self.write(0, 4)
     let mut rem = n - 4
-    let align_bits = if self.nbit % 8 == 0 { 0 } else { 8 - (self.nbit % 8) }
+    let align_bits = if self.nbit % 8 == 0 { 0 } else { 8 - self.nbit % 8 }
     rem = rem - align_bits
     self.write(0, align_bits)
     let pad = rem / 8

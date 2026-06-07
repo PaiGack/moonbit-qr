@@ -1,0 +1,38 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "PaiGack/moonbitqrcode/src/lib"
+
+import {
+  "PaiGack/moonbitqrcode/src/coding",
+}
+
+// Values
+pub fn encode(String, LibLevel) -> QRCode raise @coding.QRError
+
+pub fn encode_high(String) -> QRCode
+
+pub fn encode_low(String) -> QRCode
+
+pub fn encode_medium(String) -> QRCode
+
+// Errors
+
+// Types and methods
+pub enum LibLevel {
+  L
+  M
+  Q
+  H
+} derive(Compare, Eq)
+
+pub struct QRCode {
+  size : Int
+  modules : Array[Array[Int]]
+}
+pub fn QRCode::is_black(Self, Int, Int) -> Bool
+pub fn QRCode::size(Self) -> Int
+pub fn QRCode::to_string(Self) -> String
+
+// Type aliases
+
+// Traits
+

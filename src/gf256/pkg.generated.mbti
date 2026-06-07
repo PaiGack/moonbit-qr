@@ -1,0 +1,29 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "PaiGack/moonbitqrcode/src/gf256"
+
+// Values
+
+// Errors
+
+// Types and methods
+type Field
+pub fn Field::add(Self, Byte, Byte) -> Byte
+pub fn Field::exp(Self, Int) -> Byte
+pub fn Field::inv(Self, Byte) -> Byte
+pub fn Field::log(Self, Byte) -> Int
+pub fn Field::mul(Self, Byte, Byte) -> Byte
+pub fn Field::new(Int, Int) -> Self
+
+pub struct RSEncoder {
+  f : Field
+  c : Int
+  gen : Array[Byte]
+  lgen : Array[Byte]
+}
+pub fn RSEncoder::ecc(Self, Array[Byte]) -> Array[Byte]
+pub fn RSEncoder::new(Field, Int) -> Self
+
+// Type aliases
+
+// Traits
+

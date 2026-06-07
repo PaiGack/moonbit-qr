@@ -26,11 +26,14 @@ test "basic exp" {
 ///|
 test "ecc basic" {
   let f = @gf256.Field::new(0x11d, 2)
-  let data = [b'\x10', b'\x20', b'\x0c', b'\x56', b'\x61', b'\x80',
-              b'\xec', b'\x11', b'\xec', b'\x11', b'\xec', b'\x11',
-              b'\xec', b'\x11', b'\xec', b'\x11']
-  let want = [b'\xa5', b'\x24', b'\xd4', b'\xc1', b'\xed', b'\x36',
-              b'\xc7', b'\x87', b'\x2c', b'\x55']
+  let data = [
+    b'\x10', b'\x20', b'\x0c', b'\x56', b'\x61', b'\x80', b'\xec', b'\x11', b'\xec',
+    b'\x11', b'\xec', b'\x11', b'\xec', b'\x11', b'\xec', b'\x11',
+  ]
+  let want = [
+    b'\xa5', b'\x24', b'\xd4', b'\xc1', b'\xed', b'\x36', b'\xc7', b'\x87', b'\x2c',
+    b'\x55',
+  ]
   let rs = @gf256.RSEncoder::new(f, want.length())
   let out = rs.ecc(data)
   assert_true(bytes_eq(out, want))

@@ -1,0 +1,154 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "PaiGack/moonbitqrcode/src/coding"
+
+import {
+  "PaiGack/moonbitqrcode/src/gf256",
+}
+
+// Values
+pub fn alpha_bits(Int, Int) -> Int
+
+pub fn alpha_encode(String, Bits, Int) -> Unit
+
+pub let black : Int
+
+pub let field : @gf256.Field
+
+pub let invert : Int
+
+pub let max_version : Int
+
+pub let min_version : Int
+
+pub fn num_bits(Int, Int) -> Int
+
+pub fn num_encode(String, Bits, Int) -> Unit
+
+pub fn offset_pixel(Int) -> Int
+
+pub fn pixel_offset(Int) -> Int
+
+pub fn pixel_role(Int) -> PixelRole
+
+pub fn s_is_alpha(String) -> Bool
+
+pub fn s_is_num(String) -> Bool
+
+pub fn string_bits(Int, Int) -> Int
+
+pub fn string_encode(String, Bits, Int) -> Unit
+
+pub fn version_data_bytes(Int, Level) -> Int
+
+pub let vtab : Array[VersionInfo]
+
+// Errors
+pub suberror QRError {
+  QRError(String)
+}
+pub fn QRError::new(String) -> Self
+
+// Types and methods
+pub struct Bits {
+  b : Array[Byte]
+  mut nbit : Int
+}
+pub fn Bits::append(Self, Array[Byte]) -> Unit
+pub fn Bits::bits(Self) -> Int
+pub fn Bits::bytes(Self) -> Array[Byte]
+pub fn Bits::new() -> Self
+pub fn Bits::pad(Self, Int) -> Unit
+pub fn Bits::reset(Self) -> Unit
+pub fn Bits::write(Self, Int, Int) -> Unit
+
+pub enum Encoding {
+  Num(String)
+  Alpha(String)
+  Str(String)
+}
+pub fn Encoding::alpha(String) -> Self
+pub fn Encoding::bits(Self, Int) -> Int
+pub fn Encoding::check(Self) -> Bool
+pub fn Encoding::encode(Self, Bits, Int) -> Unit
+pub fn Encoding::num(String) -> Self
+pub fn Encoding::str(String) -> Self
+
+pub enum Level {
+  L
+  M
+  Q
+  H
+} derive(Compare, Eq)
+pub fn Level::of_int(Int) -> Self
+pub fn Level::to_int(Self) -> Int
+
+pub struct LevelInfo {
+  nblock : Int
+  check : Int
+} derive(Eq)
+
+pub enum Mask {
+  M0
+  M1
+  M2
+  M3
+  M4
+  M5
+  M6
+  M7
+} derive(Compare, Eq)
+pub fn Mask::invert(Self, Int, Int) -> Bool
+pub fn Mask::of_int(Int) -> Self
+pub fn Mask::to_int(Self) -> Int
+
+pub enum PixelRole {
+  None
+  Position
+  Alignment
+  Timing
+  Format
+  PVersion
+  Unused
+  Data
+  Check
+  Extra
+} derive(Compare, Eq)
+pub fn PixelRole::of_int(Int) -> Self
+pub fn PixelRole::to_int(Self) -> Int
+pub fn PixelRole::to_pixel(Self) -> Int
+
+pub struct Plan {
+  version : Int
+  mut level : Level
+  mut mask : Mask
+  mut data_bytes : Int
+  mut check_bytes : Int
+  mut blocks : Int
+  mut pixel : Array[Array[Int]]
+}
+pub fn Plan::encode(Self, Array[Encoding]) -> QRCode raise QRError
+pub fn Plan::new(Int, Level, Mask) -> Self raise QRError
+pub fn Plan::size(Self) -> Int
+
+pub struct QRCode {
+  bitmap : Array[Byte]
+  size : Int
+  stride : Int
+}
+pub fn QRCode::black(Self, Int, Int) -> Bool
+
+pub struct VersionInfo {
+  apos : Int
+  astride : Int
+  bytes : Int
+  pattern : Int
+  level : Array[LevelInfo]
+} derive(Eq)
+
+// Type aliases
+pub type Pixel = Int
+
+pub type Version = Int
+
+// Traits
+

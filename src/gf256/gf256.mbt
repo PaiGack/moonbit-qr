@@ -61,7 +61,7 @@ fn reducible(p : Int) -> Bool {
   // Multiplying n-bit * n-bit produces (2n-1)-bit,
   // so if p is reducible, one of its factors must be
   // of np/2+1 bits or fewer.
-  for q = 2; q < (1 << (np / 2 + 1)); q = q + 1 {
+  for q = 2; q < 1 << (np / 2 + 1); q = q + 1 {
     if poly_div(p, q) == 0 {
       return true
     }

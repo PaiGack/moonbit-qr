@@ -154,10 +154,14 @@ pub fn s_is_alpha(s : String) -> Bool {
 }
 
 // Length-indicator sizes (in bits) per size class.
+
+///|
 let num_len : Array[Int] = [10, 12, 14]
 
+///|
 let alpha_len : Array[Int] = [9, 11, 13]
 
+///|
 let string_len : Array[Int] = [8, 16, 16]
 
 ///|

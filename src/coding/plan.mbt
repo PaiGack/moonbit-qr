@@ -38,7 +38,11 @@ pub struct Plan {
 
 ///|
 /// Create a new QR code plan.
-pub fn Plan::new(version : Version, level : Level, mask : Mask) -> Plan raise QRError {
+pub fn Plan::new(
+  version : Version,
+  level : Level,
+  mask : Mask,
+) -> Plan raise QRError {
   if version < min_version || version > max_version {
     raise QRError("invalid QR version")
   }
@@ -67,7 +71,10 @@ pub fn Plan::size(self : Plan) -> Int {
 
 ///|
 /// Encode the given text encodings into a QR code bitmap.
-pub fn Plan::encode(self : Plan, encs : Array[Encoding]) -> QRCode raise QRError {
+pub fn Plan::encode(
+  self : Plan,
+  encs : Array[Encoding],
+) -> QRCode raise QRError {
   let b = Bits::new()
   for i = 0; i < encs.length(); i = i + 1 {
     let t = encs[i]
@@ -77,8 +84,13 @@ pub fn Plan::encode(self : Plan, encs : Array[Encoding]) -> QRCode raise QRError
     t.encode(b, self.version)
   }
   if b.bits() > self.data_bytes * 8 {
-    raise QRError("cannot encode " + b.bits().to_string() +
-      " bits into " + (self.data_bytes * 8).to_string() + "-bit code")
+    raise QRError(
+      "cannot encode " +
+      b.bits().to_string() +
+      " bits into " +
+      (self.data_bytes * 8).to_string() +
+      "-bit code",
+    )
   }
   add_check_bytes(b, self.version, self.level)
   let bytes = b.bytes()
@@ -110,7 +122,10 @@ pub fn Plan::encode(self : Plan, encs : Array[Encoding]) -> QRCode raise QRError
 ///|
 /// QRCode::black returns true if the pixel at (x, y) is black.
 pub fn QRCode::black(self : QRCode, x : Int, y : Int) -> Bool {
-  x >= 0 && x < self.size && y >= 0 && y < self.size &&
+  x >= 0 &&
+  x < self.size &&
+  y >= 0 &&
+  y < self.size &&
   (self.bitmap[y * self.stride + x / 8].to_int() & (1 << (7 - x % 8))) != 0
 }
 
@@ -428,7 +443,10 @@ fn pos_box(m : Array[Array[Pixel]], x : Int, y : Int) -> Unit {
   for dy = 0; dy < 7; dy = dy + 1 {
     for dx = 0; dx < 7; dx = dx + 1 {
       let mut p = pos
-      if dx == 0 || dx == 6 || dy == 0 || dy == 6 ||
+      if dx == 0 ||
+        dx == 6 ||
+        dy == 0 ||
+        dy == 6 ||
         (dx >= 2 && dx <= 4 && dy >= 2 && dy <= 4) {
         p = p | black
       }

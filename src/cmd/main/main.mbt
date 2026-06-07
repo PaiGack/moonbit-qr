@@ -1,5 +1,6 @@
 // Command-line tool for generating QR codes
 
+///|
 fn main {
   println("=== Go QR Code Generator (Reference) ===")
 

@@ -143,6 +143,8 @@ pub fn Mask::of_int(i : Int) -> Mask {
 }
 
 // Mask functions. The mask returns true if the pixel at (i, j) should be inverted.
+
+///|
 fn mask_invert(m : Mask, i : Int, j : Int) -> Bool {
   match m {
     M0 => (i + j) % 2 == 0
@@ -150,9 +152,9 @@ fn mask_invert(m : Mask, i : Int, j : Int) -> Bool {
     M2 => j % 3 == 0
     M3 => (i + j) % 3 == 0
     M4 => (i / 2 + j / 3) % 2 == 0
-    M5 => (i * j) % 2 + (i * j) % 3 == 0
-    M6 => ((i * j) % 2 + (i * j) % 3) % 2 == 0
-    M7 => ((i * j) % 3 + (i + j) % 2) % 2 == 0
+    M5 => i * j % 2 + i * j % 3 == 0
+    M6 => (i * j % 2 + i * j % 3) % 2 == 0
+    M7 => (i * j % 3 + (i + j) % 2) % 2 == 0
   }
 }
 
