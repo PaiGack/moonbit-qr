@@ -13,12 +13,12 @@ name = "PaiGack/moonbitqrcode"
 
 version = "0.1.0"
 
-readme = "README.mbt.md"
+readme = "README.md"
 
-repository = ""
+repository = "https://github.com/PaiGack/moonbit-qr"
 
 license = "Apache-2.0"
 
-keywords = [ "QR", "MoonBit QR Code"]
+keywords = [ "QR", "二维码", "MoonBit QR Code"]
 
-description = "Basic QR encoder."
+description = "Basic QR encoder. MoonBit QR 码生成器。"
