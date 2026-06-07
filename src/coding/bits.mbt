@@ -57,12 +57,13 @@ pub fn Bits::write(self : Bits, v_in : Int, nbit_in : Int) -> Unit {
     if n > 8 {
       n = 8
     }
-    if self.nbit % 8 == 0 {
+    let pos_before = self.nbit % 8
+    if pos_before == 0 {
       // Starting a new byte.
       self.b.push(b'\x00')
     } else {
       // Cap n to fill the rest of the current byte.
-      let m = 8 - (self.nbit % 8)
+      let m = 8 - pos_before
       if n > m {
         n = m
       }
@@ -73,9 +74,8 @@ pub fn Bits::write(self : Bits, v_in : Int, nbit_in : Int) -> Unit {
     let cur = self.b[byte_idx].to_int()
     // bits_to_write: the n MSB-aligned bits of v
     let bits_to_write = (v >> sh) & ((1 << n) - 1)
-    // Place bits at position (8 - n - pos_in_byte) where pos_in_byte is bits used in current byte.
-    let pos = self.nbit % 8
-    let shift = 8 - n - pos
+    // Place bits at position (8 - n - pos_before)
+    let shift = 8 - n - pos_before
     let mask = bits_to_write << shift
     self.b[byte_idx] = (cur | mask).to_byte()
     // clear the bits we just wrote from v
@@ -96,10 +96,11 @@ pub fn Bits::pad(self : Bits, n : Int) -> Unit {
   } else {
     self.write(0, 4)
     let mut rem = n - 4
-    rem = rem - (8 - (self.nbit % 8))
-    self.write(0, 8 - (self.nbit % 8))
+    let align_bits = if self.nbit % 8 == 0 { 0 } else { 8 - (self.nbit % 8) }
+    rem = rem - align_bits
+    self.write(0, align_bits)
     let pad = rem / 8
-    for i = 0; i < pad; i = i + 1 {
+    for i = 0; i < pad; i = i + 2 {
       self.write(0xec, 8)
       if i + 1 >= pad {
         break
