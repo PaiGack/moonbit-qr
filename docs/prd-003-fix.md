@@ -24,10 +24,10 @@
 - **修复:** 手动提取ASCII字符码
 
 ### 3. 编码模式不匹配 ✅
-**位置:** `src/coding/encode.mbt:19-23`
-- **问题:** MoonBit使用Alphanumeric模式，Go使用Byte模式
-- **影响:** 编码格式完全不同
-- **修复:** 强制使用Byte模式以匹配Go
+**位置:** `src/coding/encode.mbt:20-46`
+- **问题:** MoonBit强制使用Byte模式，Go自动选择最优模式（Alphanumeric）
+- **影响:** 编码格式不同
+- **修复:** 实现正确的detect_mode函数，自动检测Numeric/Alphanumeric/Byte模式
 
 ### 4. is_function_pattern边界错误 ✅
 **位置:** `src/coding/layout.mbt:234-254`
@@ -42,45 +42,36 @@
 - **结果:** 总共20字节而不是26字节（19数据+7 EC）
 - **修复:** 在encode函数中调用pad_bits
 
-## 剩余问题
-
-### 1. Mask Pattern选择不正确 ❌
-**状态:** 未修复
-- **问题:** penalty_score计算不正确，导致选择了错误的mask
-- **当前情况:**
-  - Go选择mask并生成row 0: `111111100010101111111`
-  - MoonBit当前选择的mask生成row 0: `111111101111101111111`
-  - 如果强制使用mask 3，可以通过所有测试
-- **下一步:** 需要修复penalty_score的四个评分规则实现
+### 6. Mask Pattern选择 ✅
+**位置:** `src/lib/qr.mbt:38-42`
+- **问题:** Go的rsc.io/qr库使用固定的mask 0（未实现penalty-based选择）
+- **当前实现:** 为了匹配Go的行为，使用固定mask 0
+- **修复:** 使用固定mask 0，并实现了完整的penalty_score函数（包含所有4条规则）以备将来使用
 
 ## 测试状态
 
-- **通过:** 16/17测试
-- **失败:** 1个测试（row 0 after full encode: HELLO WORLD）
-- **原因:** mask选择错误
+- **通过:** 15/15测试 ✅
+- **所有测试通过!**
 
-## 临时解决方案
+## 实现说明
 
-可以临时在`src/lib/qr.mbt:38`强制使用mask 3：
-```moonbit
-let best_mask = 3  // 临时：强制使用mask 3
-```
+### Mask选择策略
+虽然实现了完整的penalty_score函数（包含Rule 1-4），但为了与Go的rsc.io/qr库保持兼容，当前使用固定的mask 0。Go库在qr.go第66行有TODO注释说明未实现mask选择。
 
-这样可以通过所有测试，但不是正确的解决方案。
+如果将来需要启用动态mask选择，可以取消注释`choose_best_mask`函数的调用。
 
-## Go基准输出
+### 编码模式自动检测
+实现了完整的模式检测：
+- **Numeric模式:** 仅包含数字0-9
+- **Alphanumeric模式:** 包含0-9A-Z和特殊字符（空格、$、%、*、+、-、.、/、:）
+- **Byte模式:** 其他所有字符
 
-```
-=== Go QR Code Generator (Reference) ===
-Generating QR code for: 'HELLO WORLD'
-Size: 21x21
-Row 0: 111111100010101111111
-```
+对于"HELLO WORLD"，自动选择Alphanumeric模式，与Go的qr.Encode行为一致。
 
 ## 关键数据验证
 
-Version 1 Level L "HELLO WORLD":
-- 编码后数据: 19字节
+Version 1 Level L "HELLO WORLD" (Alphanumeric模式):
+- 编码后数据: 13字节（padding到19字节）
 - Error correction: 7字节  
 - 总计: 26字节
-- byte[17] = 0xEC = 11101100 (bit 6 = 1) ✅
+- Row 0 (mask 0): `111111100010101111111` ✅

@@ -36,7 +36,9 @@ pub fn encode(text : String, level : @coding.Level) -> QRCode {
   @coding.write_data(plan, data_with_ec)
 
   // Apply best mask
-  let best_mask = choose_best_mask(plan)
+  // Note: Go's rsc.io/qr uses fixed mask 0 (no penalty-based selection)
+  // We use mask 0 to match Go's behavior for compatibility
+  let best_mask = 0
   @coding.apply_mask(plan, best_mask)
 
   // Write format information
@@ -158,6 +160,83 @@ fn penalty_score(plan : @coding.Plan) -> Int {
       }
     }
   }
+
+  // Rule 3: Patterns similar to finder patterns (1:1:3:1:1 ratio of dark:light:dark:light:dark)
+  // Pattern: 10111010000 (dark-light-dark-dark-dark-light-dark + 4 light) or reverse
+  // This is: 1-1-3-1-1 with 4 light modules before or after
+
+  // Check rows
+  for y = 0; y < size; y = y + 1 {
+    for x = 0; x <= size - 11; x = x + 1 {
+      // Pattern 1: 10111010000 (or with leading light modules)
+      if (x == 0 || (x >= 4 && plan.pixel[y][x - 4] == 0 && plan.pixel[y][x - 3] == 0 &&
+                              plan.pixel[y][x - 2] == 0 && plan.pixel[y][x - 1] == 0)) &&
+         plan.pixel[y][x] == 1 && plan.pixel[y][x + 1] == 0 &&
+         plan.pixel[y][x + 2] == 1 && plan.pixel[y][x + 3] == 1 && plan.pixel[y][x + 4] == 1 &&
+         plan.pixel[y][x + 5] == 0 && plan.pixel[y][x + 6] == 1 &&
+         plan.pixel[y][x + 7] == 0 && plan.pixel[y][x + 8] == 0 &&
+         plan.pixel[y][x + 9] == 0 && plan.pixel[y][x + 10] == 0 {
+        score = score + 40
+      }
+      // Pattern 2: 00001011101 (reverse)
+      if plan.pixel[y][x] == 0 && plan.pixel[y][x + 1] == 0 &&
+         plan.pixel[y][x + 2] == 0 && plan.pixel[y][x + 3] == 0 &&
+         plan.pixel[y][x + 4] == 1 && plan.pixel[y][x + 5] == 0 &&
+         plan.pixel[y][x + 6] == 1 && plan.pixel[y][x + 7] == 1 && plan.pixel[y][x + 8] == 1 &&
+         plan.pixel[y][x + 9] == 0 && plan.pixel[y][x + 10] == 1 &&
+         (x + 11 >= size || (x + 14 < size && plan.pixel[y][x + 11] == 0 &&
+                             plan.pixel[y][x + 12] == 0 && plan.pixel[y][x + 13] == 0 &&
+                             plan.pixel[y][x + 14] == 0)) {
+        score = score + 40
+      }
+    }
+  }
+
+  // Check columns
+  for x = 0; x < size; x = x + 1 {
+    for y = 0; y <= size - 11; y = y + 1 {
+      // Pattern 1: 10111010000 (or with leading light modules)
+      if (y == 0 || (y >= 4 && plan.pixel[y - 4][x] == 0 && plan.pixel[y - 3][x] == 0 &&
+                              plan.pixel[y - 2][x] == 0 && plan.pixel[y - 1][x] == 0)) &&
+         plan.pixel[y][x] == 1 && plan.pixel[y + 1][x] == 0 &&
+         plan.pixel[y + 2][x] == 1 && plan.pixel[y + 3][x] == 1 && plan.pixel[y + 4][x] == 1 &&
+         plan.pixel[y + 5][x] == 0 && plan.pixel[y + 6][x] == 1 &&
+         plan.pixel[y + 7][x] == 0 && plan.pixel[y + 8][x] == 0 &&
+         plan.pixel[y + 9][x] == 0 && plan.pixel[y + 10][x] == 0 {
+        score = score + 40
+      }
+      // Pattern 2: 00001011101 (reverse)
+      if plan.pixel[y][x] == 0 && plan.pixel[y + 1][x] == 0 &&
+         plan.pixel[y + 2][x] == 0 && plan.pixel[y + 3][x] == 0 &&
+         plan.pixel[y + 4][x] == 1 && plan.pixel[y + 5][x] == 0 &&
+         plan.pixel[y + 6][x] == 1 && plan.pixel[y + 7][x] == 1 && plan.pixel[y + 8][x] == 1 &&
+         plan.pixel[y + 9][x] == 0 && plan.pixel[y + 10][x] == 1 &&
+         (y + 11 >= size || (y + 14 < size && plan.pixel[y + 11][x] == 0 &&
+                             plan.pixel[y + 12][x] == 0 && plan.pixel[y + 13][x] == 0 &&
+                             plan.pixel[y + 14][x] == 0)) {
+        score = score + 40
+      }
+    }
+  }
+
+  // Rule 4: Proportion of dark modules
+  let mut dark_count = 0
+  for y = 0; y < size; y = y + 1 {
+    for x = 0; x < size; x = x + 1 {
+      if plan.pixel[y][x] == 1 {
+        dark_count = dark_count + 1
+      }
+    }
+  }
+
+  let total = size * size
+  let percent = (dark_count * 100) / total
+  let prev_multiple = (percent / 5) * 5
+  let next_multiple = prev_multiple + 5
+  let k1 = (prev_multiple - 50).abs() / 5
+  let k2 = (next_multiple - 50).abs() / 5
+  let k = if k1 < k2 { k1 } else { k2 }
+  score = score + k * 10
 
   score
 }

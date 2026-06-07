@@ -18,10 +18,33 @@ pub fn encode_data(text : String, version : Int, _level : Level) -> Bits {
 }
 
 // detect_mode determines the best encoding mode for text
-fn detect_mode(_text : String) -> Encoding {
-  // Force Byte mode to match Go's rsc.io/qr behavior
-  // Go's String type always uses Byte mode, not Alphanumeric
-  Byte
+fn detect_mode(text : String) -> Encoding {
+  // Check if all characters are numeric
+  let mut all_numeric = true
+  let mut all_alphanumeric = true
+
+  for i = 0; i < text.length(); i = i + 1 {
+    let code = text[i].to_int()
+
+    // Check numeric (0-9)
+    if code < 48 || code > 57 {
+      all_numeric = false
+    }
+
+    // Check alphanumeric
+    if !is_alphanumeric(code) {
+      all_alphanumeric = false
+    }
+  }
+
+  // Return most efficient encoding
+  if all_numeric {
+    Numeric
+  } else if all_alphanumeric {
+    Alphanumeric
+  } else {
+    Byte
+  }
 }
 
 // is_alphanumeric checks if a byte is in the alphanumeric character set
