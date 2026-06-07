@@ -253,11 +253,11 @@ pub fn write_data(p : Plan, data : Array[Int]) -> Unit {
   let total_bits = data.length() * 8
 
   // Write data in zigzag pattern matching Go rsc.io/qr implementation
-  // Sweep right-to-left in column pairs, alternating down/up
+  // Sweep right-to-left in column pairs, alternating UP/DOWN
   let mut x = size
 
   while x > 0 {
-    // Sweep DOWN: y from size-1 to 0
+    // Sweep UP: y from size-1 to 0 (bottom to top)
     for y = size - 1; y >= 0; y = y - 1 {
       // Right column (x-1)
       if !is_function_pattern(p, x - 1, y) {
@@ -287,12 +287,12 @@ pub fn write_data(p : Plan, data : Array[Int]) -> Unit {
     }
 
     x = x - 2
-    // Skip timing column (column 6) - check between down and up sweeps
+    // Skip timing column (column 6)
     if x == 7 {
       x = x - 1
     }
 
-    // Sweep UP: y from 0 to size-1
+    // Sweep DOWN: y from 0 to size-1 (top to bottom)
     for y = 0; y < size; y = y + 1 {
       // Right column (x-1)
       if !is_function_pattern(p, x - 1, y) {
