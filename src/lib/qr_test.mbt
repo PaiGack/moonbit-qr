@@ -42,3 +42,47 @@ test "ASCII output generation" {
   // Output should contain block characters
   assert_true!(output.contains("█"))
 }
+
+// ============================================================
+// Format encoding tests — verified against Go rsc.io/qr
+// Go command: go test -v -run TestFormatEncoding
+// ============================================================
+test "format encoding positions: level=L mask=3" {
+  // Expected values from Go: go test -v -run TestFormatEncoding
+  // Column 8 (rows 0,1,2,3,4,5,7,8): 1,0,1,1,1,0,0,1
+  // Row 8   (cols 0,1,2,3,4,5,7,8): 1,1,1,1,0,0,0,1
+  let plan = @coding.new_plan(1, @coding.L)
+  @coding.init_grid(plan)
+  @coding.write_format(plan, 3)
+
+  let col8_rows  = [0, 1, 2, 3, 4, 5, 7, 8]
+  let col8_exp   = [1, 0, 1, 1, 1, 0, 0, 1]
+  for i = 0; i < col8_rows.length(); i = i + 1 {
+    let y = col8_rows[i]
+    assert_eq!(plan.pixel[y][8], col8_exp[i])
+  }
+
+  let row8_cols  = [0, 1, 2, 3, 4, 5, 7, 8]
+  let row8_exp   = [1, 1, 1, 1, 0, 0, 0, 1]
+  for i = 0; i < row8_cols.length(); i = i + 1 {
+    let x = row8_cols[i]
+    assert_eq!(plan.pixel[8][x], row8_exp[i])
+  }
+}
+
+// ============================================================
+// Row 0 test — verified against Go rsc.io/qr
+// Go command: go test -v -run TestRow0
+// Go output:  111111101011101111111
+// ============================================================
+test "row 0 after full encode: HELLO WORLD" {
+  let qr = @lib.encode_low("HELLO WORLD")
+
+  let mut actual = ""
+  for x = 0; x < qr.size; x = x + 1 {
+    actual = actual + (if qr.modules[0][x] == 1 { "1" } else { "0" })
+  }
+
+  assert_eq!(actual, "111111101011101111111")
+}
+

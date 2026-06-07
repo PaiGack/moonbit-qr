@@ -9,11 +9,23 @@ fn main {
   println("Version: " + qr1.version.to_string() + ", Size: " + qr1.size.to_string() + "x" + qr1.size.to_string())
 
   // Debug: print row 0 as binary
-  print("Row 0: ")
+  let mut row0 = "Row 0: "
   for x = 0; x < qr1.size; x = x + 1 {
-    print(if qr1.modules[0][x] == 1 { "1" } else { "0" })
+    row0 = row0 + (if qr1.modules[0][x] == 1 { "1" } else { "0" })
   }
-  println("\n")
+  println(row0)
+  println("Expected: 111111101011101111111")
+
+  // Print differences
+  let expected = "111111101011101111111"
+  for x = 0; x < qr1.size; x = x + 1 {
+    let actual_bit = if qr1.modules[0][x] == 1 { "1" } else { "0" }
+    let expected_bit = expected.get(x)
+    if actual_bit != expected_bit.to_string() {
+      println("  Diff at x=" + x.to_string() + ": got " + actual_bit + ", expected " + expected_bit.to_string())
+    }
+  }
+  println()
 
   println(qr1.to_string())
 

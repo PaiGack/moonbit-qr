@@ -5,7 +5,40 @@ import (
 	"strings"
 
 	"rsc.io/qr"
+	"rsc.io/qr/coding"
 )
+
+// Test format encoding
+func testFormatEncoding() {
+	fmt.Println("=== Testing Format Encoding ===")
+
+	// Create a plan with Level L and Mask 3
+	plan, err := coding.NewPlan(1, coding.L, 3)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("\nFormat information positions:")
+	fmt.Println("Top-left area (row 0-8, column 8):")
+	for y := 0; y <= 8; y++ {
+		if y == 6 {
+			continue // timing row
+		}
+		pix := plan.Pixel[y][8]
+		black := (pix & coding.Black) != 0
+		fmt.Printf("  pixel[%d][8] = %v\n", y, black)
+	}
+
+	fmt.Println("\nTop-left area (row 8, column 0-8):")
+	for x := 0; x <= 8; x++ {
+		if x == 6 {
+			continue // timing column
+		}
+		pix := plan.Pixel[8][x]
+		black := (pix & coding.Black) != 0
+		fmt.Printf("  pixel[8][%d] = %v\n", x, black)
+	}
+}
 
 // Format QR code as terminal output using █ for black pixels
 func formatQRCode(code *qr.Code) string {
@@ -27,7 +60,11 @@ func formatQRCode(code *qr.Code) string {
 }
 
 func main() {
-	fmt.Println("=== Go QR Code Generator (Reference) ===\n")
+	// Test format encoding first
+	testFormatEncoding()
+	fmt.Println()
+
+	fmt.Println("=== Go QR Code Generator (Reference) ===")
 
 	// Test 1: Simple text with Low error correction
 	fmt.Println("Generating QR code for: 'HELLO WORLD'")
@@ -36,6 +73,17 @@ func main() {
 		panic(err)
 	}
 	fmt.Printf("Size: %dx%d\n", qr1.Size, qr1.Size)
+
+	// Print row 0 as binary
+	fmt.Print("Row 0: ")
+	for x := 0; x < qr1.Size; x++ {
+		if qr1.Black(x, 0) {
+			fmt.Print("1")
+		} else {
+			fmt.Print("0")
+		}
+	}
+	fmt.Println()
 	fmt.Println(formatQRCode(qr1))
 
 	// Test 2: Numeric data with Low error correction
