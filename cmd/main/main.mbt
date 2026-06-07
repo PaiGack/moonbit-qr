@@ -7,6 +7,14 @@ fn main {
   println("Generating QR code for: 'HELLO WORLD'")
   let qr1 = @lib.encode_low("HELLO WORLD")
   println("Version: " + qr1.version.to_string() + ", Size: " + qr1.size.to_string() + "x" + qr1.size.to_string())
+
+  // Debug: print row 0 as binary
+  print("Row 0: ")
+  for x = 0; x < qr1.size; x = x + 1 {
+    print(if qr1.modules[0][x] == 1 { "1" } else { "0" })
+  }
+  println("\n")
+
   println(qr1.to_string())
 
   // Test 2: Numeric data

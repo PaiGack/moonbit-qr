@@ -174,28 +174,13 @@ pub fn QRCode::get(self : QRCode, x : Int, y : Int) -> Bool {
 pub fn QRCode::to_string(self : QRCode) -> String {
   let mut result = ""
 
-  // Add top border
-  for _i = 0; _i < self.size + 2; _i = _i + 1 {
-    result = result + "█"
-  }
-  result = result + "\n"
-
-  // Add each row
+  // Output each row (no decorative border - scanners need proper quiet zone)
   for y = 0; y < self.size; y = y + 1 {
-    result = result + "█"  // Left border
-
     for x = 0; x < self.size; x = x + 1 {
       result = result + (if self.get(x, y) { "██" } else { "  " })
     }
-
-    result = result + "█\n"  // Right border
+    result = result + "\n"
   }
-
-  // Add bottom border
-  for _i = 0; _i < self.size + 2; _i = _i + 1 {
-    result = result + "█"
-  }
-  result = result + "\n"
 
   result
 }

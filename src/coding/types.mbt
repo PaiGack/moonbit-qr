@@ -54,9 +54,8 @@ pub fn Bits::bytes(self : Bits) -> Array[Int] {
   self.b
 }
 
-// append appends n bits from val (taking from low bits)
+// append appends n bits from val (taking from high bits)
 pub fn Bits::append(self : Bits, val : Int, n : Int) -> Unit {
-  let mut v = val
   let mut remaining = n
 
   while remaining > 0 {
@@ -69,11 +68,11 @@ pub fn Bits::append(self : Bits, val : Int, n : Int) -> Unit {
     }
 
     let idx = self.b.length() - 1
-    let shift = space - take
-    let mask = ((1 << take) - 1) << shift
-    self.b[idx] = self.b[idx] | ((v << shift) & mask)
+    let shift = remaining - take
+    let bits_to_write = (val >> shift) & ((1 << take) - 1)
+    let position = space - take
+    self.b[idx] = self.b[idx] | (bits_to_write << position)
 
-    v = v >> take
     self.nbit = self.nbit + take
     remaining = remaining - take
   }

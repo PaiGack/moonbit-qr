@@ -142,6 +142,7 @@ fn get_alignment_positions(version : Int) -> Array[Int] {
 }
 
 fn encode_format(level : Level, mask : Int) -> Int {
+  // Note: Go uses level^1 encoding: L=01, M=00, Q=11, H=10
   let level_bits = match level {
     L => 0b01
     M => 0b00
@@ -150,12 +151,16 @@ fn encode_format(level : Level, mask : Int) -> Int {
   }
 
   let data = (level_bits << 3) | (mask & 0x07)
+
   let mut d = data << 10
   let gen = 0b10100110111
 
   for _i = 0; _i < 5; _i = _i + 1 {
-    if (d & (1 << (14 - _i))) != 0 {
-      d = d ^ (gen << (4 - _i))
+    let check_bit = 14 - _i
+    let has_bit = (d & (1 << check_bit)) != 0
+    if has_bit {
+      let shift = 4 - _i
+      d = d ^ (gen << shift)
     }
   }
 
@@ -167,28 +172,34 @@ pub fn write_format(p : Plan, mask : Int) -> Unit {
   let format = encode_format(p.level, mask)
   let size = p.pixel.length()
 
-  for i = 0; i < 6; i = i + 1 {
+  // Format information is 15 bits, mapped to specific positions
+  // See ISO/IEC 18004 and rsc.io/qr implementation
+  for i = 0; i < 15; i = i + 1 {
     let bit = if (format & (1 << i)) != 0 { pixel_on } else { pixel_off }
-    p.pixel[8][i] = bit
-  }
-  let bit6 = if (format & (1 << 6)) != 0 { pixel_on } else { pixel_off }
-  p.pixel[8][7] = bit6
-  p.pixel[8][8] = if (format & (1 << 7)) != 0 { pixel_on } else { pixel_off }
-  p.pixel[7][8] = if (format & (1 << 8)) != 0 { pixel_on } else { pixel_off }
 
-  for i = 9; i < 15; i = i + 1 {
-    let bit = if (format & (1 << i)) != 0 { pixel_on } else { pixel_off }
-    p.pixel[14 - i][8] = bit
-  }
+    // Top-left format info (along row 8 and column 8, skipping timing at row/col 6)
+    if i < 6 {
+      // bits 0-5: column 8, rows 0-5
+      p.pixel[i][8] = bit
+    } else if i < 8 {
+      // bits 6-7: column 8, rows 7-8 (skip row 6 = timing)
+      p.pixel[i + 1][8] = bit
+    } else if i < 9 {
+      // bit 8: row 8, column 7 (column 6 is timing, column 8 is dark module)
+      p.pixel[8][7] = bit
+    } else {
+      // bits 9-14: row 8, columns 5,4,3,2,1,0
+      p.pixel[8][14 - i] = bit
+    }
 
-  for i = 0; i < 8; i = i + 1 {
-    let bit = if (format & (1 << i)) != 0 { pixel_on } else { pixel_off }
-    p.pixel[size - 1 - i][8] = bit
-  }
-
-  for i = 8; i < 15; i = i + 1 {
-    let bit = if (format & (1 << i)) != 0 { pixel_on } else { pixel_off }
-    p.pixel[8][size - 15 + i] = bit
+    // Bottom-left and top-right format info (mirror copy)
+    if i < 8 {
+      // bits 0-7: row 8, columns size-1 down to size-8
+      p.pixel[8][size - 1 - i] = bit
+    } else {
+      // bits 8-14: column 8, rows size-7 down to size-1 (reverse of top)
+      p.pixel[size - 1 - (14 - i)][8] = bit
+    }
   }
 }
 
