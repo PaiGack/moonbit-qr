@@ -1,175 +1,133 @@
-# MoonBit QR Code Generator
+# MoonBit QR 码生成器
 
-一个用纯MoonBit实现的QR码生成器，从Go的`rsc.io/qr`库移植而来。
+从 Go 库 [rsc.io/qr](https://pkg.go.dev/rsc.io/qr)（Russ Cox 的 QR 码生成器）完整移植到 MoonBit。支持版本 1-40、完整 Reed-Solomon 纠错，输出与 Go 参考实现**逐字节一致**。
 
 ## ✨ 特性
 
-- ✅ **纯MoonBit实现** - 无外部依赖
-- ✅ **Reed-Solomon纠错码** - 完整的GF(256)有限域运算
-- ✅ **多种编码模式** - 支持数字、字母数字、字节模式
-- ✅ **多种纠错级别** - L(7%), M(15%), Q(25%), H(30%)
-- ✅ **版本1-5支持** - 可扩展到版本40
-- ✅ **ASCII输出** - 在终端直接显示QR码
-- ✅ **完整测试** - gf256和qr包都有全面的单元测试
+- ✅ **纯 MoonBit 实现** — 无外部依赖
+- ✅ **GF(256) 有限域算术** — 完整 Reed-Solomon 纠错
+- ✅ **三种数据模式** — 数字、字母数字、字节（UTF-8）
+- ✅ **四种纠错级别** — L (7%)、M (15%)、Q (25%)、H (30%)
+- ✅ **全部 QR 版本** — 1-40（21×21 到 177×177 像素）
+- ✅ **自动版本选择** — 挑选最小可容纳版本
+- ✅ **ASCII 输出** — 终端直接显示，黑块 `██`、白块 `  `
 
 ## 🚀 快速开始
 
 ### 运行示例
 
 ```bash
-moon run cmd/main
+moon run src/cmd/main
 ```
+
+会生成三个示例 QR 码（HELLO WORLD、12345678、https://moonbitlang.com）并以 ASCII 形式输出。
 
 ### 在代码中使用
 
 ```moonbit
-// 生成低纠错级别的QR码
-let qr = @lib.encode_low("Hello, MoonBit!")
+// 使用便捷函数
+let qr_low    = @lib.encode_low("你好,MoonBit!")    // 7%  冗余
+let qr_medium = @lib.encode_medium("你好,MoonBit!")  // 15% 冗余
+let qr_high   = @lib.encode_high("你好,MoonBit!")    // 25% 冗余
 
-// 打印ASCII格式
+// 或直接调用 encode() 指定级别
+let qr = @lib.encode("你好,MoonBit!", L)
+
+// 以 ASCII 形式输出
 println(qr.to_string())
 
 // 访问像素数据
-for y = 0; y < qr.size; y = y + 1 {
-  for x = 0; x < qr.size; x = x + 1 {
-    let is_black = qr.get(x, y)
-    // 处理像素...
-  }
-}
-```
-
-### 不同纠错级别
-
-```moonbit
-let qr_low = @lib.encode_low("TEXT")       // 7% 纠错
-let qr_medium = @lib.encode_medium("TEXT") // 15% 纠错
-let qr_high = @lib.encode_high("TEXT")     // 30% 纠错
+let is_black = qr.is_black(x, y)
+let n        = qr.size
 ```
 
 ## 📦 项目结构
 
 ```
 moonbit-qr/
-├── src/
-│   ├── gf256/          # GF(256)有限域运算
-│   │   ├── gf256.mbt
-│   │   └── gf256_test.mbt
-│   ├── coding/         # QR码编码核心
-│   │   ├── types.mbt
-│   │   ├── layout.mbt
-│   │   └── encode.mbt
-│   └── lib/            # 公共API
-│       ├── qr.mbt
-│       └── qr_test.mbt
-├── cmd/main/           # CLI工具
-│   └── main.mbt
-└── docs/               # 文档
-    └── prd-000-feasibility-analysis.md
+├── moon.mod                       # 模块元信息
+├── docs/
+│   ├── prd-000.md                 # 原始 PRD
+│   └── prd-000-feasibility-analysis.md
+├── baseline/
+│   ├── compare.sh                 # 输出对比脚本
+│   └── go_rscio_qr/main.go        # Go 参考实现（用于验证）
+└── src/
+    ├── gf256/                     # 伽罗瓦域 GF(256) 算术
+    │   ├── gf256.mbt              #   Field、Add、Mul、Exp、Log、Inv、RSEncoder
+    │   └── gf256_test.mbt         #   3 个测试
+    ├── coding/                    # QR 编码核心
+    │   ├── bits.mbt               #   MSB-first 位缓冲区
+    │   ├── bits_test.mbt          #   2 个测试
+    │   ├── encoding.mbt           #   Num / Alpha / String 三种模式
+    │   ├── pixel.mbt              #   Pixel、PixelRole、Mask
+    │   ├── plan.mbt               #   Plan: vplan、fplan、lplan、mplan
+    │   └── vtab.mbt               #   版本表（v1-v40）
+    ├── lib/                       # 公共 API
+    │   ├── qr.mbt                 #   QRCode、encode_low/medium/high
+    │   └── qr_test.mbt            #   4 个测试
+    └── cmd/
+        └── main/                  # 命令行 demo
+            ├── main.mbt
+            └── moon.pkg
 ```
 
 ## 🧪 测试
 
 ```bash
-# 运行所有测试
-moon test
-
-# 运行特定包的测试
-moon test src/gf256
-moon test src/lib
+moon test                          # 运行所有测试
+moon test src/gf256                # 仅 GF(256) 测试
+moon test src/coding               # 仅 coding 包测试
+moon test src/lib                  # 仅 lib 包测试
 ```
 
-**测试结果**：
-- gf256包：9个测试全部通过 ✅
-- lib包：4个测试全部通过 ✅
+当前结果：**9/9 测试全部通过** ✅
 
-## 📚 算法详解
+## 🔬 与 Go 实现的对比验证
 
-### 1. GF(256)有限域运算 (gf256包)
+仓库内含 Go 参考实现在 `baseline/go_rscio_qr/`，可验证 MoonBit 输出与 Go 完全一致：
 
-实现了Reed-Solomon纠错码所需的伽罗瓦域GF(256)算术：
-- 加法（XOR）
-- 乘法（对数表查找）
-- 求逆
-- 多项式运算
+```bash
+cd baseline
+go run go_rscio_qr/main.go > go_output.txt.tmp
+cd ..
+moon run src/cmd/main > baseline/moonbit_output.txt.tmp
+diff baseline/moonbit_output.txt.tmp baseline/go_output.txt.tmp
+```
 
-### 2. QR码编码 (coding包)
+三个示例 QR 码（HELLO WORLD、12345678、https://moonbitlang.com）的输出**逐字节一致**。✅
 
-#### 数据编码模式
-- **数字模式** - 仅数字0-9，最高效
-- **字母数字模式** - 0-9, A-Z, 空格和一些符号
-- **字节模式** - 任意UTF-8数据
+## 📚 公共 API
 
-#### 布局生成
-- 定位图案（Finder patterns）
-- 对齐图案（Alignment patterns）
-- 时序图案（Timing patterns）
-- 格式信息（Format information）
+### `enum LibLevel`
+- `L` — 7% 冗余
+- `M` — 15% 冗余
+- `Q` — 25% 冗余
+- `H` — 30% 冗余
 
-#### 掩码选择
-自动选择8种掩码模式中最优的一种，以最小化惩罚分数。
+### `struct QRCode`
+QR 码位图。
 
-### 3. 公共API (lib包)
+- `size : Int` — 每边像素数
+- `modules : Array[Array[Int]]` — 二维数组，1 表示黑、0 表示白
 
-简洁的用户接口：
-- `encode(text, level)` - 主编码函数
-- `encode_low/medium/high(text)` - 便捷函数
-- `QRCode::get(x, y)` - 获取像素
-- `QRCode::to_string()` - ASCII输出
+方法：
+- `QRCode::size()` — 每边像素数
+- `QRCode::is_black(x, y)` — 查询像素
+- `QRCode::to_string()` — ASCII 字符串
 
-## 🎯 实现状态
-
-### 已完成 ✅
-- [x] GF(256)有限域运算
-- [x] Reed-Solomon纠错编码
-- [x] QR码布局生成
-- [x] 数据编码（数字/字母数字/字节）
-- [x] 掩码应用和选择
-- [x] 格式信息编码
-- [x] ASCII文本输出
-- [x] 版本1-5支持
-- [x] 完整单元测试
-
-### 待实现 🚧
-- [ ] SVG输出
-- [ ] PNG输出（需要CRC32和DEFLATE）
-- [ ] 版本6-40支持
-- [ ] 自动版本选择优化
-- [ ] 性能优化
+### 函数
+- `encode(text : String, level : LibLevel) -> QRCode` — 主入口
+- `encode_low(text : String) -> QRCode` — 级别 L
+- `encode_medium(text : String) -> QRCode` — 级别 M
+- `encode_high(text : String) -> QRCode` — 级别 Q
 
 ## 🔗 参考
 
-- **原始项目**: [rsc.io/qr](https://pkg.go.dev/rsc.io/qr) (Go)
-- **QR码规范**: ISO/IEC 18004
-- **MoonBit语言**: [moonbitlang.com](https://www.moonbitlang.com/)
+- **原始 Go 项目**：[rsc.io/qr](https://pkg.go.dev/rsc.io/qr)（BSD-3-Clause）
+- **QR 码规范**：ISO/IEC 18004
+- **MoonBit 语言**：[moonbitlang.com](https://www.moonbitlang.com/)
 
 ## 📄 许可证
 
-Apache-2.0 License
-
-原始Go代码：BSD-3-Clause License (Go Authors)
-
-## 🙏 致谢
-
-本项目是从Russ Cox的`rsc.io/qr` Go库移植而来，感谢原作者的优秀实现。
-
----
-
-**生成QR码示例**：
-
-```
-=== MoonBit QR Code Generator ===
-
-Generating QR code for: 'HELLO WORLD'
-Version: 1, Size: 21x21
-███████████████████████
-███████████████  ██  ████    ███████████████
-███          ██  ██████      ██          ███
-███  ██████  ██  ██  ████    ██  ██████  ███
-███  ██████  ██    ██        ██  ██████  ███
-███  ██████  ██  ██  ██      ██  ██████  ███
-███          ██  ████  ██    ██          ███
-███████████████  ██  ██  ██  ███████████████
-...
-```
-
-用手机扫描上面的QR码即可验证！🎉
+Apache-2.0。Go 参考代码保留其 BSD-3-Clause 许可证（Go Authors）。
